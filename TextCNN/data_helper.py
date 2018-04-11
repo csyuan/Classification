@@ -1,11 +1,12 @@
 import re
 import logging
+import jieba
 import numpy as np
 import pandas as pd
 from collections import Counter
 
 
-def clean_str(s):
+def clean_eng_str(s):
     """Clean sentence"""
     s = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", s)
     s = re.sub(r"\'s", " \'s", s)
@@ -25,10 +26,22 @@ def clean_str(s):
     return s.strip().lower()
 
 
-def load_data_and_labels(filename):
+def split_cn_str(s):
+    s_list = []
+    for w in s:
+        s_list.append(w)
+    return " ".join(s_list)
+
+
+def seg_cn_str(s):
+    seg_list = jieba.cut(s)
+    return " ".join(seg_list)
+
+
+def load_data_and_labels(filename, seg_word=False):
     """Load sentences and labels"""
-    df = pd.read_csv(filename, compression='zip', dtype={'consumer_complaint_narrative': object})
-    selected = ['product', 'consumer_complaint_narrative']
+    df = pd.read_csv(filename, dtype={'context': object}, sep="\t")
+    selected = ['label', 'context']
     non_selected = list(set(df.columns) - set(selected))
 
     df = df.drop(non_selected, axis=1)  # Drop non selected columns
@@ -40,9 +53,12 @@ def load_data_and_labels(filename):
     one_hot = np.zeros((len(labels), len(labels)), int)
     np.fill_diagonal(one_hot, 1)
     label_dict = dict(zip(labels, one_hot))
-
-    x_raw = df[selected[1]].apply(lambda x: clean_str(x)).tolist()
+    if seg_word:
+        x_raw = df[selected[1]].apply(lambda x: seg_cn_str(x)).tolist()
+    else:
+        x_raw = df[selected[1]].apply(lambda x: split_cn_str(x)).tolist()
     y_raw = df[selected[0]].apply(lambda y: label_dict[y]).tolist()
+    print(y_raw)
     return x_raw, y_raw, df, labels
 
 
@@ -66,5 +82,5 @@ def batch_iter(data, batch_size, num_epochs, shuffle=True):
 
 
 if __name__ == '__main__':
-    input_file = './data/consumer_complaints.csv.zip'
-    load_data_and_labels(input_file)
+    input_file = './data/train_data.txt'
+    load_data_and_labels(input_file, seg_word=False)
