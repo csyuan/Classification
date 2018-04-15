@@ -58,7 +58,7 @@ def load_data_and_labels(filename, seg_word=False):
     else:
         x_raw = df[selected[1]].apply(lambda x: split_cn_str(x)).tolist()
     y_raw = df[selected[0]].apply(lambda y: label_dict[y]).tolist()
-    print(y_raw)
+    # print(y_raw)
     return x_raw, y_raw, df, labels
 
 
@@ -66,8 +66,9 @@ def batch_iter(data, batch_size, num_epochs, shuffle=True):
     """Iterate the data batch by batch"""
     data = np.array(data)
     data_size = len(data)
-    num_batches_per_epoch = int(data_size / batch_size) + 1
-
+    # print(data_size)
+    num_batches_per_epoch = int(data_size / batch_size) + 1 # 整除可能会遇到错误，后期更改
+    # print(num_batches_per_epoch)
     for epoch in range(num_epochs):
         if shuffle:
             shuffle_indices = np.random.permutation(np.arange(data_size))

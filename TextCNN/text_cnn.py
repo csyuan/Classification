@@ -1,12 +1,14 @@
-#coding:utf-8
+# coding:utf-8
 import numpy as np
 import tensorflow as tf
+
 
 class TextCNN(object):
     """
     ex_wv:引入外部词向量，默认为None，此时词向量随机生成
     wv_update:词向量训练过程中是否更新
     """
+
     def __init__(self, sequence_length,
                  num_classes,
                  vocab_size,
@@ -44,22 +46,22 @@ class TextCNN(object):
                 W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name='W')
                 b = tf.Variable(tf.constant(0.1, shape=[num_filters]), name='b')
                 conv = tf.nn.conv2d(
-                        self.embedded_chars_expanded,
-                        W,
-                        strides=[1, 1, 1, 1],
-                        padding='VALID',
-                        name='conv')
+                    self.embedded_chars_expanded,
+                    W,
+                    strides=[1, 1, 1, 1],
+                    padding='VALID',
+                    name='conv')
 
                 # Apply nonlinearity
                 h = tf.nn.relu(tf.nn.bias_add(conv, b), name='relu')
 
                 # Maxpooling over the outputs
                 pooled = tf.nn.max_pool(
-                        h,
-                        ksize=[1, sequence_length - filter_size + 1, 1, 1],
-                        strides=[1, 1, 1, 1],
-                        padding='VALID',
-                        name='pool')
+                    h,
+                    ksize=[1, sequence_length - filter_size + 1, 1, 1],
+                    strides=[1, 1, 1, 1],
+                    padding='VALID',
+                    name='pool')
                 pooled_outputs.append(pooled)
 
         # Combine all the pooled features
@@ -74,9 +76,9 @@ class TextCNN(object):
         # Final (unnormalized) scores and predictions
         with tf.name_scope('output'):
             W = tf.get_variable(
-                    'W',
-                    shape=[num_filters_total, num_classes],
-                    initializer=tf.contrib.layers.xavier_initializer())
+                'W',
+                shape=[num_filters_total, num_classes],
+                initializer=tf.contrib.layers.xavier_initializer())
             b = tf.Variable(tf.constant(0.1, shape=[num_classes]), name='b')
             l2_loss += tf.nn.l2_loss(W)
             l2_loss += tf.nn.l2_loss(b)
@@ -93,18 +95,25 @@ class TextCNN(object):
         with tf.name_scope('accuracy'):
             # correct_predictions = tf.equal(self.predictions, tf.argmax(self.input_y, 1))
             # self.accuracy = tf.reduce_mean(tf.cast(correct_predictions, 'float'), name='accuracy')
-            self.accuracy = tf.metrics.accuracy(labels=self.input_y, predictions=self.predictions)
+            # how to use tf.metrics.accuracy() function, how about tf.contrib.metrics.accuracy()
+            # 在使用tf.metrics.accuracy()时一定要加tf.local_variables_initializer()
+            self.accuracy, _ = tf.metrics.accuracy(labels=tf.argmax(self.input_y, 1), predictions=self.predictions)
+            print(self.accuracy)
 
         with tf.name_scope('precision'):
             # correct_predictions = tf.equal(self.predictions, tf.argmax(self.input_y, 1))
             # self.accuracy = tf.reduce_mean(tf.cast(correct_predictions, 'float'), name='accuracy')
-            self.accuracy = tf.metrics.precision(labels=self.input_y, predictions=self.predictions)
+            self.precision, _ = tf.metrics.precision(labels=tf.argmax(self.input_y, 1), predictions=self.predictions)
+            print(self.precision)
 
         with tf.name_scope('recall'):
-            self.recall = tf.metrics.recall(labels=self.input_y, predictions=self.predictions)
+            self.recall, _ = tf.metrics.recall(labels=tf.argmax(self.input_y, 1), predictions=self.predictions)
+            print(self.recall)
 
         with tf.name_scope('confusion_matrix'):
-            self.confusion_matrix = tf.confusion_matrix(labels=self.input_y, predictions=self.predictions)
+            # self.confusion_matrix = tf.contrib.metrics.confusion_matrix(labels=tf.argmax(self.input_y, 1), predictions=self.predictions)
+            self.confusion_matrix = tf.confusion_matrix(labels=tf.argmax(self.input_y, 1), predictions=self.predictions)
+            print(self.confusion_matrix)
 
         with tf.name_scope('num_correct'):
             correct_predictions = tf.equal(self.predictions, tf.argmax(self.input_y, 1))

@@ -1,3 +1,4 @@
+#coding:utf-8
 import os
 import sys
 import json
@@ -16,7 +17,7 @@ logging.getLogger().setLevel(logging.INFO)
 def train_cnn():
     """Step 0: load sentences, labels, and training parameters"""
     train_file = sys.argv[1]
-    x_raw, y_raw, df, labels = data_helper.load_data_and_labels(train_file)
+    x_raw, y_raw, df, labels = data_helper.load_data_and_labels(train_file,seg_word=False)
 
     parameter_file = sys.argv[2]
     params = json.loads(open(parameter_file).read())
@@ -25,6 +26,7 @@ def train_cnn():
     max_document_length = max([len(x.split(' ')) for x in x_raw])
     logging.info('The maximum length of all sentences: {}'.format(max_document_length))
     vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
+    # 自定义词典和词向量，后期修改
     x = np.array(list(vocab_processor.fit_transform(x_raw)))
     y = np.array(y_raw)
 
@@ -91,14 +93,17 @@ def train_cnn():
             # Save the word_to_id map since predict.py needs it
             vocab_processor.save(os.path.join(out_dir, "vocab.pickle"))
             sess.run(tf.global_variables_initializer())
+            sess.run(tf.local_variables_initializer())
 
             # Training starts here
             train_batches = data_helper.batch_iter(list(zip(x_train, y_train)), params['batch_size'],
                                                    params['num_epochs'])
+            # print(train_batches)
             best_accuracy, best_at_step = 0, 0
 
             """Step 6: train the cnn model with x_train and y_train (batch by batch)"""
             for train_batch in train_batches:
+                # print(train_batch)
                 x_train_batch, y_train_batch = zip(*train_batch)
                 train_step(x_train_batch, y_train_batch)
                 current_step = tf.train.global_step(sess, global_step)
@@ -119,6 +124,7 @@ def train_cnn():
                     if dev_accuracy >= best_accuracy:
                         best_accuracy, best_at_step = dev_accuracy, current_step
                         path = saver.save(sess, checkpoint_prefix, global_step=current_step)
+                        # print(path)
                         logging.critical('Saved model at {} at step {}'.format(path, best_at_step))
                         logging.critical('Best accuracy is {} at step {}'.format(best_accuracy, best_at_step))
 
@@ -131,7 +137,7 @@ def train_cnn():
                 total_test_correct += num_test_correct
 
             test_accuracy = float(total_test_correct) / len(y_test)
-            logging.critical('Accuracy on test set is {} based on the best model {}'.format(test_accuracy, path))
+            logging.critical('Accuracy on test set is {} based on the best model {}'.format(test_accuracy, "./"))
             logging.critical('The training is complete')
 
 
