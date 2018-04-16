@@ -9,15 +9,16 @@ class TextCNN(object):
     wv_update:词向量训练过程中是否更新
     """
 
-    def __init__(self, sequence_length,
+    def __init__(self,
+                 sequence_length,
                  num_classes,
                  vocab_size,
                  embedding_size,
                  filter_sizes,
                  num_filters,
                  l2_reg_lambda=0.0,
-                 ex_wv=None,
-                 wv_update=False):
+                 embedding_mat=None,
+                 wv_non_static=False):
         # Placeholders for input, output and dropout
         self.input_x = tf.placeholder(tf.int32, [None, sequence_length], name='input_x')
         self.input_y = tf.placeholder(tf.float32, [None, num_classes], name='input_y')
@@ -28,12 +29,12 @@ class TextCNN(object):
 
         # Embedding layer
         with tf.device('/cpu:0'), tf.name_scope('embedding'):
-            if ex_wv is not None:
-                wv_mat = tf.Variable(ex_wv, name='wv_mat', trainable=wv_update)
+            if embedding_mat is not None:
+                wv_mat = tf.Variable(embedding_mat, name='wv_mat', trainable=wv_non_static)
                 self.embedded_chars = tf.nn.embedding_lookup(wv_mat, self.input_x)
             else:
                 wv_mat = tf.Variable(tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0),
-                                     name='wv_mat', trainable=wv_update)
+                                     name='wv_mat', trainable=wv_non_static)
                 self.embedded_chars = tf.nn.embedding_lookup(wv_mat, self.input_x)
             self.embedded_chars_expanded = tf.expand_dims(self.embedded_chars, -1)
 
