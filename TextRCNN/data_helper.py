@@ -38,17 +38,17 @@ def split_cn_str(s):
     s_list = []
     for w in s:
         s_list.append(w)
-    return " ".join(s_list)
+    return s_list
 
 
 def seg_cn_str(s):
     seg_list = jieba.cut(s)
-    return " ".join(seg_list)
+    return seg_list
 
 def load_embeddings(vocabulary):
     word_embeddings = {}
     for word in vocabulary:
-        word_embeddings[word] = np.random.uniform(-0.25, 0.25, 300)
+        word_embeddings[word] = np.random.uniform(-0.25, 0.25, 50)
     return word_embeddings
 
 
@@ -101,7 +101,7 @@ def batch_iter(data, batch_size, num_epochs, shuffle=True):
 
 
 def load_data(filename, seg_word=False):
-    df = pd.read_csv(filename,dtype={'context': object}, sep="\t")
+    df = pd.read_csv(filename,dtype={'context': object}, sep="\t", encoding="utf-8")
     selected = ['label', 'context']
     non_selected = list(set(df.columns) - set(selected))
 

@@ -7,3 +7,11 @@ pos	赞 来了，倒也不白看。
 pos	赞 赞 三省吾身的收获？
 neg	不错啊，学习了！ ------------------------------------------- 查看白银、原油双向投资赚钱技巧，推荐访问：中金在线金十数据名师讲解
 neg	查看黄金、白银、原油双向投资赚钱技巧，推荐访问：中金在线金十数据名师讲解
+pos	BURGLARY OF STORE, FORCIBLE ENTRY
+pos	AGGRAVATED ASSAULT WITH A KNIFE
+pos	GRAND THEFT FROM LOCKED AUTO
+pos	POSSESSION OF NARCOTICS PARAPHERNALIA
+pos	POSSESSION OF NARCOTICS PARAPHERNALIA
+pos	GRAND THEFT FROM LOCKED AUTO
+neg	GRAND THEFT FROM UNLOCKED AUTO
+neg	MALICIOUS MISCHIEF, VANDALISM
