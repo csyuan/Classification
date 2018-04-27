@@ -64,7 +64,6 @@ class TextCNNRNN(object):
 
         # lstm_cell = tf.nn.rnn_cell.GRUCell(num_units=hidden_unit)
         lstm_cell = tf.contrib.rnn.GRUCell(num_units=hidden_unit)
-
         # lstm_cell = tf.nn.rnn_cell.DropoutWrapper(lstm_cell, output_keep_prob=self.dropout_keep_prob)
         lstm_cell = tf.contrib.rnn.DropoutWrapper(lstm_cell, output_keep_prob=self.dropout_keep_prob)
 
